@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>卡通贪吃蛇游戏</title>
+  <style>
+    /* Dify WEB大师 - 2025-10-07 17:30:12 */
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f0f8ff; /* 浅蓝背景，营造卡通氛围 */
+      font-family: "Comic Sans MS", cursive, sans-serif;
+    }
+
+    .game-container {
+      text-align: center;
+    }
+
+    h1 {
+      color: #ff6b6b;
+      margin-bottom: 10px;
+    }
+
+    canvas {
+      border: 4px solid #4ecdc4;
+      border-radius: 12px;
+      background-color: #fff;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .score {
+      margin-top: 10px;
+      font-size: 20px;
+      color: #45b7d1;
+    }
+
+    .controls {
+      margin-top: 15px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>🐍 卡通贪吃蛇 🍎</h1>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="score">得分: <span id="score">0</span></div>
+    <div class="controls">使用方向键控制蛇的移动</div>
+  </div>
+
+  <script>
+    // Dify WEB大师 - 2025-10-07 17:30:12
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
+
+    // 游戏配置
+    const gridSize = 20; // 每格大小
+    const gridWidth = canvas.width / gridSize;
+    const gridHeight = canvas.height / gridSize;
+
+    // 初始状态
+    let snake = [
+      {x: 10, y: 10}
+    ];
+    let food = generateFood();
+    let direction = 'right';
+    let nextDirection = 'right';
+    let score = 0;
+    let gameSpeed = 120; // 毫秒
+    let gameRunning = true;
+
+    // 生成食物（不与蛇体重叠）
+    function generateFood() {
+      let newFood;
+      do {
+        newFood = {
+          x: Math.floor(Math.random() * gridWidth),
+          y: Math.floor(Math.random() * gridHeight)
+        };
+      } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+      return newFood;
+    }
+
+    // 绘制蛇（卡通风格：圆角方块 + 眼睛）
+    function drawSnake() {
+      snake.forEach((segment, index) => {
+        ctx.fillStyle = index === 0 ? '#4ecdc4' : '#45b7d1'; // 头部颜色不同
+        ctx.beginPath();
+        ctx.roundRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize, 6);
+        ctx.fill();
+
+        // 画眼睛（仅头部）
+        if (index === 0) {
+          ctx.fillStyle = '#000';
+          let eyeSize = 3;
+          let eyeOffset = 5;
+          let eyeX = segment.x * gridSize + eyeOffset;
+          let eyeY = segment.y * gridSize + eyeOffset;
+
+          // 根据方向调整眼睛位置
+          switch (direction) {
+            case 'up':
+              eyeX += gridSize - 2 * eyeOffset - eyeSize;
+              break;
+            case 'down':
+              eyeY += gridSize - 2 * eyeOffset - eyeSize;
+              break;
+            case 'left':
+              eyeY += gridSize - 2 * eyeOffset - eyeSize;
+              break;
+            case 'right':
+              eyeX += gridSize - 2 * eyeOffset - eyeSize;
+              break;
+          }
+          ctx.beginPath();
+          ctx.arc(eyeX, eyeY, eyeSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    }
+
+    // 绘制食物（卡通苹果）
+    function drawFood() {
+      ctx.fillStyle = '#ff6b6b';
+      ctx.beginPath();
+      ctx.arc(
+        food.x * gridSize + gridSize / 2,
+        food.y * gridSize + gridSize / 2,
+        gridSize / 2 - 2,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+
+      // 苹果梗
+      ctx.fillStyle = '#8bc34a';
+      ctx.fillRect(food.x * gridSize + gridSize / 2 - 1, food.y * gridSize + 2, 2, 4);
+    }
+
+    // 更新蛇的位置
+    function moveSnake() {
+      direction = nextDirection;
+      const head = {...snake[0]};
+
+      switch (direction) {
+        case 'up': head.y--; break;
+        case 'down': head.y++; break;
+        case 'left': head.x--; break;
+        case 'right': head.x++; break;
+      }
+
+      // 检查撞墙
+      if (head.x < 0 || head.x >= gridWidth || head.y < 0 || head.y >= gridHeight) {
+        gameOver();
+        return;
+      }
+
+      // 检查撞自己
+      if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        gameOver();
+        return;
+      }
+
+      snake.unshift(head);
+
+      // 检查是否吃到食物
+      if (head.x === food.x && head.y === food.y) {
+        score += 10;
+        scoreDisplay.textContent = score;
+        food = generateFood();
+        // 加快速度（但不低于60ms）
+        if (gameSpeed > 60) gameSpeed -= 2;
+      } else {
+        snake.pop(); // 没吃到就移除尾部
+      }
+    }
+
+    // 游戏主循环
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      moveSnake();
+      drawFood();
+      drawSnake();
+
+      setTimeout(gameLoop, gameSpeed);
+    }
+
+    // 游戏结束
+    function gameOver() {
+      gameRunning = false;
+      alert(`游戏结束！你的得分是：${score}`);
+      // 重置游戏
+      snake = [{x: 10, y: 10}];
+      food = generateFood();
+      direction = 'right';
+      nextDirection = 'right';
+      score = 0;
+      scoreDisplay.textContent = score;
+      gameSpeed = 120;
+      gameRunning = true;
+      gameLoop();
+    }
+
+    // 键盘控制
+    document.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp':
+          if (direction !== 'down') nextDirection = 'up';
+          break;
+        case 'ArrowDown':
+          if (direction !== 'up') nextDirection = 'down';
+          break;
+        case 'ArrowLeft':
+          if (direction !== 'right') nextDirection = 'left';
+          break;
+        case 'ArrowRight':
+          if (direction !== 'left') nextDirection = 'right';
+          break;
+      }
+    });
+
+    // 兼容 roundRect（部分浏览器可能不支持）
+    if (!ctx.roundRect) {
+      ctx.roundRect = function(x, y, width, height, radius) {
+        if (width < 2 * radius) radius = width / 2;
+        if (height < 2 * radius) radius = height / 2;
+        this.beginPath();
+        this.moveTo(x + radius, y);
+        this.arcTo(x + width, y, x + width, y + height, radius);
+        this.arcTo(x + width, y + height, x, y + height, radius);
+        this.arcTo(x, y + height, x, y, radius);
+        this.arcTo(x, y, x + width, y, radius);
+        this.closePath();
+        return this;
+      };
+    }
+
+    // 启动游戏
+    gameLoop();
+  </script>
+</body>
+</html>

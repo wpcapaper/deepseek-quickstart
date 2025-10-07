@@ -1,0 +1,58 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>网页版贪吃蛇</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        #status-bar {
+            width: 800px;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 18px;
+        }
+        #game-canvas {
+            border: 2px solid #000;
+        }
+        #game-over-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="status-bar">
+    <div>得分：<span id="score">3</span></div>
+    <div>速度：<span id="speed">300ms</span></div>
+</div>
+<canvas id="game-canvas" width="800" height="600"></canvas>
+<div id="game-over-modal">
+    <div class="modal-content">
+        <h2>游戏结束</h2>
+        <p>最终得分：<span id="final-score">3</span></p>
+        <button onclick="restartGame()">重新开始</button>
+    </div>
+</div>
+
+<script src="snake-game.js"></script>
+</body>
+</html>
