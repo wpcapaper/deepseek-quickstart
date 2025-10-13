@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "weather": {
+      "disabled": true,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/code/path/to/mcp/weather",
+        "run",
+        "weather.py"
+      ]
+    },
+    "12306-mcp": {
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "12306-mcp"
+      ]
+    },
+    "amap-maps": {
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@amap/amap-maps-mcp-server"
+      ],
+      "env": {
+        "AMAP_MAPS_API_KEY": "<ApiKey>"
+      }
+    },
+    "caiyun-weather": {
+      "disabled": false,
+      "timeout": 60,
+      "type": "sse",
+      "url": "https://mcp.api-inference.modelscope.net/<modelscope_id>/sse"
+    }
+  }
+}

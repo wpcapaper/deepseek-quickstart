@@ -57,6 +57,16 @@ def format_alert(feature: dict) -> str:
 # --- MCP 工具定义 ---
 
 @mcp.tool()
+async def get_states() -> str:
+    """
+    获取全部的州代码。理论上返回的就是通用的州简写，符合地理常识。
+    """
+    return '''
+    AL, AK, AS, AR, AZ, CA, CO, CT, DE, DC, FL, GA, GU, HI, ID, IL, IN, IA, KS, KY, LA, ME, MD, MA, MI, MN, MS, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, PR, RI, SC, SD, TN, TX, UT, VT, VI, VA, WA, WV, WI, WY, MP, PW, FM, MH
+    '''
+
+
+@mcp.tool()
 async def get_alerts(state: str) -> str:
     """
     获取美国某个州当前生效的天气预警信息。
